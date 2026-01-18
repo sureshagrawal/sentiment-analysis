@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Frontend – Sentiment Analysis UI
 
-## Getting Started
+This directory contains the **frontend web application** for the Sentiment Analysis system.
 
-First, run the development server:
+The UI is designed to be:
+- Clean
+- Responsive
+- Confidence-aware
+- User-friendly
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Key Features
+
+- Text input for sentiment analysis
+- Animated confidence bar
+- Emoji-based sentiment feedback
+- Gradient-based premium UI
+- Mobile-first responsive design
+
+---
+
+## 🛠 Tech Stack
+
+- Next.js (App Router)
+- Tailwind CSS
+- JavaScript (no TypeScript)
+- Fetch API for backend communication
+
+---
+
+## 🔁 API Integration
+
+The frontend consumes the backend API using a standardized response schema.
+
+### Example Response
+```json
+{
+  "status": "success",
+  "data": {
+    "sentiment": "Neutral",
+    "confidence": 0.54
+  },
+  "meta": {
+    "model": "TF-IDF + RandomForest",
+    "version": "v1"
+  }
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🧪 Local Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+App runs at:
+```
+http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Deploy on Vercel
+Used to connect with the backend API.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🎯 Design Philosophy
+
+- UI reflects model confidence visually
+- Neutral predictions are clearly communicated
+- Animations are subtle and meaningful
+- No business logic duplication
+
+---
+
+## 🔮 Future Enhancements
+
+- Improved accessibility
+- Theme customization
+- Mobile-focused UX refinements
