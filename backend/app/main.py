@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from ml.model import predict_sentiment
-
+# from ml.model import predict_sentiment
+from ml.inference import predict_sentiment
 
 app = FastAPI(title="Sentiment Analysis API")
 
@@ -21,10 +21,21 @@ class SentimentRequest(BaseModel):
 def health_check():
     return {"status": "ok"}
 
+# @app.post("/sentiment")
+# def analyze_sentiment(request: SentimentRequest):
+#     sentiment = predict_sentiment(request.text)
+#     return {
+#         "sentiment": sentiment
+#     }
+
 @app.post("/sentiment")
 def analyze_sentiment(request: SentimentRequest):
-    sentiment = predict_sentiment(request.text)
+    result = predict_sentiment(request.text)
     return {
-        "sentiment": sentiment
+        "sentiment": result["sentiment"],
+        "confidence": result["confidence"],
+        "model": "TF-IDF + RandomForest"
     }
+
+
 
