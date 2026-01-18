@@ -1,45 +1,52 @@
-# -------------------------------
-# Base image (stable + compatible)
-# -------------------------------
+# --------------------------------------------------
+# Base image
+# --------------------------------------------------
 FROM python:3.11-slim
 
-# -------------------------------
-# Environment settings
-# -------------------------------
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# -------------------------------
-# Set working directory
-# -------------------------------
+# --------------------------------------------------
+# Working directory
+# --------------------------------------------------
 WORKDIR /app
 
-# -------------------------------
-# System dependencies (minimal)
-# -------------------------------
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# --------------------------------------------------
+# System dependencies
+# --------------------------------------------------
+RUN apt-get update \
+ && apt-get install -y curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-# -------------------------------
-# Install Python dependencies
-# -------------------------------
+# --------------------------------------------------
+# Python dependencies
+# --------------------------------------------------
 COPY requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# -------------------------------
-# Copy application code
-# -------------------------------
+# --------------------------------------------------
+# Application source code
+# --------------------------------------------------
 COPY . .
 
-# -------------------------------
-# Expose port (Render uses 10000)
-# -------------------------------
+# --------------------------------------------------
+# Create model directory
+# --------------------------------------------------
+RUN mkdir -p ml/models
+
+# --------------------------------------------------
+# 🔥 Download ML models at BUILD TIME (Google Drive)
+# --------------------------------------------------
+RUN curl -L \
+  "https://drive.google.com/uc?export=download&id=1XPUF-WyMf9GFK9NFdgd7ZXnK-sjGVEsw" \
+  -o ml/models/sentiment_model.pkl \
+ && curl -L \
+  "https://drive.google.com/uc?export=download&id=1gROH25ADggHROyD7hzaBs4ZJcRiRv9jA" \
+  -o ml/models/vectorizer.pkl
+
+# --------------------------------------------------
+# Expose Render port
+# --------------------------------------------------
 EXPOSE 10000
 
-# -------------------------------
+# --------------------------------------------------
 # Start FastAPI app
-# -------------------------------
+# --------------------------------------------------
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]

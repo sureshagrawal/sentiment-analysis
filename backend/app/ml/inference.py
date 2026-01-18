@@ -1,7 +1,6 @@
 import joblib
 import re
 import os
-import urllib.request
 
 # ==================================================
 # PATH SETUP
@@ -12,31 +11,6 @@ MODEL_DIR = os.path.join(BASE_DIR, "models")
 
 MODEL_PATH = os.path.join(MODEL_DIR, "sentiment_model.pkl")
 VECT_PATH = os.path.join(MODEL_DIR, "vectorizer.pkl")
-
-# ==================================================
-# EXTERNAL MODEL URLS (UPDATED MODEL)
-# ==================================================
-
-MODEL_URL = "https://drive.google.com/uc?id=1XPUF-WyMf9GFK9NFdgd7ZXnK-sjGVEsw"
-VECT_URL = "https://drive.google.com/uc?id=1gROH25ADggHROyD7hzaBs4ZJcRiRv9jA"
-
-# ==================================================
-# DOWNLOAD IF MISSING
-# ==================================================
-
-def download_if_missing():
-    os.makedirs(MODEL_DIR, exist_ok=True)
-
-    if not os.path.exists(MODEL_PATH):
-        print("⬇️ Downloading sentiment model...")
-        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
-
-    if not os.path.exists(VECT_PATH):
-        print("⬇️ Downloading vectorizer...")
-        urllib.request.urlretrieve(VECT_URL, VECT_PATH)
-
-
-download_if_missing()
 
 # ==================================================
 # LOAD MODEL (ON STARTUP)
@@ -67,7 +41,7 @@ def clean_text(text: str) -> str:
 # ==================================================
 
 def predict_sentiment(text: str) -> dict:
-    if not model or not vectorizer:
+    if model is None or vectorizer is None:
         return {
             "sentiment": "Error",
             "confidence": 0.0
@@ -83,11 +57,7 @@ def predict_sentiment(text: str) -> dict:
         max_prob = float(probs.max())
         predicted_class = classes[probs.argmax()]
 
-        # Neutral threshold (unchanged logic)
-        if max_prob < 0.65:
-            sentiment = "Neutral"
-        else:
-            sentiment = predicted_class
+        sentiment = "Neutral" if max_prob < 0.65 else predicted_class
 
         return {
             "sentiment": sentiment,
