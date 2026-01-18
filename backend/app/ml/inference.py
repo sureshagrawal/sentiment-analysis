@@ -13,9 +13,8 @@ VECT_PATH = os.path.join(MODEL_DIR, "vectorizer.pkl")
 
 # ---------------- EXTERNAL MODEL URLS ----------------
 
-MODEL_URL = "https://drive.google.com/uc?id=169YhLUPRqVqcJwxk_DDJmboVbt0b0asF"
-VECT_URL = "https://drive.google.com/uc?id=1l5-elOtbXW7_IyFB0rwcX0QXlZWjJyam"
-
+MODEL_URL = "https://drive.google.com/uc?id=1s2k-GfcM8JkzMEkDx5V4JSB_sAqgrwbZ"
+VECT_URL = "https://drive.google.com/uc?id=16ne-gRCSOBiJJ0GzUDQcCW6rGS2mPhhs"
 
 # ---------------- DOWNLOAD IF MISSING ----------------
 
