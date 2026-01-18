@@ -3,66 +3,118 @@
 import { useState } from "react";
 
 export default function Home() {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [confidence, setConfidence] = useState(null);
+
+  async function analyzeSentiment() {
+    if (!text.trim()) return;
+
+    setLoading(true);
+    setResult(null);
+    setConfidence(null);
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/sentiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      const data = await res.json();
+      setResult(data.sentiment);
+      setConfidence(data.confidence);
+    } catch (e) {
+      setResult("Error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const sentimentMap = {
+    Positive: { emoji: "😊", label: "Positive mood" },
+    Negative: { emoji: "😡", label: "Negative mood" },
+    Neutral: { emoji: "😐", label: "Neutral mood" },
+    Error: { emoji: "⚠️", label: "Error" },
+  };
+
+  const meta = sentimentMap[result];
+
+  /* 🎨 CONFIDENCE → GRADIENT COLOR */
+  function confidenceGradient(conf) {
+    if (conf >= 0.8)
+      return "from-emerald-400 via-green-500 to-emerald-600";
+    if (conf >= 0.6)
+      return "from-sky-400 via-blue-500 to-indigo-600";
+    return "from-yellow-300 via-amber-400 to-orange-400";
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center px-4">
-      
-      <div className="w-full max-w-lg bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl 
-                      rounded-3xl shadow-2xl p-8 border border-white/20">
-        
+      <div className="w-full max-w-xl bg-white/90 backdrop-blur-2xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] p-8">
+
         {/* Header */}
-        <h1 className="text-3xl font-extrabold text-center tracking-tight text-gray-800 dark:text-white">
+        <h1 className="text-4xl font-extrabold text-center text-gray-900 tracking-tight">
           Sentiment Analyzer
         </h1>
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Feel the emotion behind words ✨
+        <p className="text-center text-sm text-gray-500 mt-2">
+          AI that understands emotions behind text
         </p>
 
         {/* Input */}
-        <div className="mt-8">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Your text
-          </label>
-          <textarea
-            placeholder="Example: I absolutely loved the experience!"
-            className="w-full h-32 p-4 rounded-2xl border border-gray-300 dark:border-neutral-700 
-                       bg-white dark:bg-neutral-800 text-gray-800 dark:text-white
-                       focus:outline-none focus:ring-4 focus:ring-purple-500/40 
-                       resize-none transition"
-          />
-        </div>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type something like: I am feeling okay today..."
+          className="w-full h-32 mt-8 p-4 rounded-2xl border border-gray-300
+                     focus:outline-none focus:ring-4 focus:ring-purple-300
+                     resize-none text-gray-800"
+        />
 
         {/* Button */}
         <button
-          onClick={() => setResult("Positive")}
-          className="w-full mt-8 py-3 rounded-2xl font-semibold text-white text-lg
+          onClick={analyzeSentiment}
+          disabled={loading}
+          className="w-full mt-6 py-3 rounded-2xl text-white font-semibold text-lg
                      bg-gradient-to-r from-purple-600 to-pink-600
-                     hover:shadow-xl hover:scale-[1.02]
-                     active:scale-[0.97]
-                     transition-all duration-200"
+                     hover:scale-[1.04] transition-transform
+                     disabled:opacity-60"
         >
-          Analyze Sentiment 🚀
+          {loading ? "Analyzing sentiment..." : "Analyze Sentiment"}
         </button>
 
-        {/* Result */}
-        <div className="mt-8 text-center">
-          <p className="text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Result
-          </p>
+        {/* Result Card */}
+        {meta && (
+          <div className="mt-10 rounded-2xl p-6 bg-white shadow-inner border border-gray-200">
 
-          <div
-            className={`mt-3 inline-flex items-center gap-2 px-6 py-3 rounded-full text-lg font-bold
-              ${
-                result === "Positive"
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-gray-300"
-              }`}
-          >
-            {result === "Positive" ? "😊 Positive" : "—"}
+            <div className="flex items-center justify-center gap-3 text-2xl font-bold mb-4">
+              <span>{meta.emoji}</span>
+              <span className="text-gray-800">{meta.label}</span>
+            </div>
+
+            {/* 🌈 BEAUTIFUL CONFIDENCE BAR */}
+            {confidence !== null && (
+              <div className="mt-4">
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Confidence</span>
+                  <span className="font-semibold">
+                    {(confidence * 100).toFixed(1)}%
+                  </span>
+                </div>
+
+                <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`absolute inset-y-0 left-0 rounded-full 
+                                bg-gradient-to-r ${confidenceGradient(confidence)}
+                                transition-all duration-1000 ease-out`}
+                    style={{ width: `${confidence * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-
+        )}
       </div>
     </main>
   );
