@@ -91,8 +91,35 @@ sentiment-analysis/
 │   └── web/
 ├── backend/
 │   └── app/
+│       ├── ml/
+│       │   ├── inference.py
+│       │   └── train_model.py
+│       └── main.py
+├── runtime.txt
 └── README.md
 ```
+
+---
+
+## 🧠 Model & Inference Strategy
+
+- Trained ML model artifacts (.pkl) are not stored in the Git repository
+- Model files are downloaded dynamically at runtime during backend startup
+- This keeps the repository lightweight and avoids large binary commits
+- Once downloaded, models are reused for all inference requests
+- No retraining happens during deployment
+
+This approach reflects real-world industry practices for deploying ML-backed APIs.
+
+---
+
+## 🚀 Current Status
+
+- ML model trained and validated
+- API standardized and stable
+- Frontend UI polished and synced with API
+- Externalized ML model loading implemented
+- Ready for cloud deployment
 
 ---
 
