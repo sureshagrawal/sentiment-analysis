@@ -10,7 +10,7 @@ dist/
 build/
 
 # ML models
-*.pkl
+backend/app/ml/models/*.pkl
 *.joblib
 
 # OS

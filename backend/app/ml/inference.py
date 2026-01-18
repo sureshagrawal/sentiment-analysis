@@ -1,13 +1,37 @@
 import joblib
 import re
 import os
+import urllib.request
 
 # ---------------- PATH SETUP ----------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, "models")
 
-MODEL_PATH = os.path.join(BASE_DIR, "models", "sentiment_model.pkl")
-VECT_PATH = os.path.join(BASE_DIR, "models", "vectorizer.pkl")
+MODEL_PATH = os.path.join(MODEL_DIR, "sentiment_model.pkl")
+VECT_PATH = os.path.join(MODEL_DIR, "vectorizer.pkl")
+
+# ---------------- EXTERNAL MODEL URLS ----------------
+
+MODEL_URL = "https://drive.google.com/uc?id=169YhLUPRqVqcJwxk_DDJmboVbt0b0asF"
+VECT_URL = "https://drive.google.com/uc?id=1l5-elOtbXW7_IyFB0rwcX0QXlZWjJyam"
+
+
+# ---------------- DOWNLOAD IF MISSING ----------------
+
+def download_if_missing():
+    os.makedirs(MODEL_DIR, exist_ok=True)
+
+    if not os.path.exists(MODEL_PATH):
+        print("⬇️ Downloading sentiment model...")
+        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+
+    if not os.path.exists(VECT_PATH):
+        print("⬇️ Downloading vectorizer...")
+        urllib.request.urlretrieve(VECT_URL, VECT_PATH)
+
+
+download_if_missing()
 
 # ---------------- LOAD MODEL ----------------
 
@@ -17,7 +41,7 @@ vectorizer = joblib.load(VECT_PATH)
 # ---------------- TEXT CLEANING ----------------
 
 def clean_text(text: str) -> str:
-    text = text.lower()
+    text = str(text).lower()
     text = re.sub(r"http\S+|www\S+", "", text)
     text = re.sub(r"@\w+|#\w+", "", text)
     text = re.sub(r"[^a-z\s]", "", text)
@@ -36,7 +60,7 @@ def predict_sentiment(text: str) -> dict:
         max_prob = float(probs.max())
         predicted_class = classes[probs.argmax()]
 
-        # Neutral confidence threshold
+        # Neutral confidence threshold (same as before)
         if max_prob < 0.65:
             sentiment = "Neutral"
         else:
@@ -47,7 +71,8 @@ def predict_sentiment(text: str) -> dict:
             "confidence": round(max_prob, 2)
         }
 
-    except Exception:
+    except Exception as e:
+        print("❌ Inference error:", e)
         return {
             "sentiment": "Error",
             "confidence": 0.0
