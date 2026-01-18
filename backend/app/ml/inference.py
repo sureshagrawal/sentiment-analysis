@@ -3,7 +3,9 @@ import re
 import os
 import urllib.request
 
-# ---------------- PATH SETUP ----------------
+# ==================================================
+# PATH SETUP
+# ==================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
@@ -11,12 +13,16 @@ MODEL_DIR = os.path.join(BASE_DIR, "models")
 MODEL_PATH = os.path.join(MODEL_DIR, "sentiment_model.pkl")
 VECT_PATH = os.path.join(MODEL_DIR, "vectorizer.pkl")
 
-# ---------------- EXTERNAL MODEL URLS ----------------
+# ==================================================
+# EXTERNAL MODEL URLS (UPDATED MODEL)
+# ==================================================
 
-MODEL_URL = "https://drive.google.com/uc?id=1s2k-GfcM8JkzMEkDx5V4JSB_sAqgrwbZ"
-VECT_URL = "https://drive.google.com/uc?id=16ne-gRCSOBiJJ0GzUDQcCW6rGS2mPhhs"
+MODEL_URL = "https://drive.google.com/uc?id=1ngg09H2ZeOT3oiU2E7xOQ9_atgc7HlmA"
+VECT_URL = "https://drive.google.com/uc?id=1MQ-cY7AQpioEdKKLmzuzP7xmr59ir_Kz"
 
-# ---------------- DOWNLOAD IF MISSING ----------------
+# ==================================================
+# DOWNLOAD IF MISSING
+# ==================================================
 
 def download_if_missing():
     os.makedirs(MODEL_DIR, exist_ok=True)
@@ -32,12 +38,22 @@ def download_if_missing():
 
 download_if_missing()
 
-# ---------------- LOAD MODEL ----------------
+# ==================================================
+# LOAD MODEL (ON STARTUP)
+# ==================================================
 
-model = joblib.load(MODEL_PATH)
-vectorizer = joblib.load(VECT_PATH)
+try:
+    model = joblib.load(MODEL_PATH)
+    vectorizer = joblib.load(VECT_PATH)
+    print("✅ ML model loaded successfully")
+except Exception as e:
+    print("❌ Failed to load ML model:", e)
+    model = None
+    vectorizer = None
 
-# ---------------- TEXT CLEANING ----------------
+# ==================================================
+# TEXT CLEANING (TRAINING-COMPATIBLE)
+# ==================================================
 
 def clean_text(text: str) -> str:
     text = str(text).lower()
@@ -46,9 +62,17 @@ def clean_text(text: str) -> str:
     text = re.sub(r"[^a-z\s]", "", text)
     return text.strip()
 
-# ---------------- INFERENCE ----------------
+# ==================================================
+# INFERENCE
+# ==================================================
 
 def predict_sentiment(text: str) -> dict:
+    if not model or not vectorizer:
+        return {
+            "sentiment": "Error",
+            "confidence": 0.0
+        }
+
     try:
         cleaned = clean_text(text)
         vec = vectorizer.transform([cleaned])
@@ -59,7 +83,7 @@ def predict_sentiment(text: str) -> dict:
         max_prob = float(probs.max())
         predicted_class = classes[probs.argmax()]
 
-        # Neutral confidence threshold (same as before)
+        # Neutral threshold (unchanged logic)
         if max_prob < 0.65:
             sentiment = "Neutral"
         else:
