@@ -85,15 +85,14 @@ ML Inference Layer
 
 ## 📂 Repository Structure
 
+```text
 sentiment-analysis/
-│
 ├── frontend/
-│ └── web/ # Frontend application
-│
+│   └── web/
 ├── backend/
-│ └── app/ # FastAPI backend + ML logic
-│
-└── README.md # Project overview
+│   └── app/
+└── README.md
+```
 
 ---
 
