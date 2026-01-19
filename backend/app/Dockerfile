@@ -2,26 +2,55 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# System deps
+# --------------------------------------------------
+# System dependencies
+# --------------------------------------------------
 RUN apt-get update \
- && apt-get install -y curl ca-certificates \
+ && apt-get install -y ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Python deps
+# --------------------------------------------------
+# Python dependencies
+# --------------------------------------------------
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
- && pip install --no-cache-dir gdown
+ && pip install --no-cache-dir huggingface_hub
 
-# App code
+# --------------------------------------------------
+# Application source
+# --------------------------------------------------
 COPY . .
 
+# --------------------------------------------------
 # Create model directory
+# --------------------------------------------------
 RUN mkdir -p ml/models
 
-# ✅ CORRECT Google Drive download (large file safe)
-RUN gdown --fuzzy https://drive.google.com/file/d/1XPUF-WyMf9GFK9NFdgd7ZXnK-sjGVEsw -O ml/models/sentiment_model.pkl \
- && gdown --fuzzy https://drive.google.com/file/d/1gROH25ADggHROyD7hzaBs4ZJcRiRv9jA -O ml/models/vectorizer.pkl
+# --------------------------------------------------
+# Download models from Hugging Face (BUILD TIME)
+# --------------------------------------------------
+RUN python - <<EOF
+from huggingface_hub import hf_hub_download
 
+hf_hub_download(
+    repo_id="sureshagrawal/sentiment-analysis-rf",
+    filename="sentiment_model.pkl",
+    local_dir="ml/models"
+)
+
+hf_hub_download(
+    repo_id="sureshagrawal/sentiment-analysis-rf",
+    filename="vectorizer.pkl",
+    local_dir="ml/models"
+)
+EOF
+
+# --------------------------------------------------
+# Expose Render port
+# --------------------------------------------------
 EXPOSE 10000
 
+# --------------------------------------------------
+# Start FastAPI
+# --------------------------------------------------
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
